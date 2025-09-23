@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Professional hair salon management system">
+    <title>Salon Management System</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1 class="logo">SalonPro</h1>
+            <nav class="nav">
+                <button class="nav-toggle" aria-label="Toggle navigation">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <ul class="nav-menu">
+                    <li><a href="#dashboard" class="nav-link">Dashboard</a></li>
+                    <li><a href="#entry" class="nav-link">New Entry</a></li>
+                    <li><a href="#reports" class="nav-link">Reports</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="section active">
+                <h2>Today's Overview</h2>
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <h3>Total Sales</h3>
+                        <div class="stat-value" id="total-sales">$0.00</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Transactions</h3>
+                        <div class="stat-value" id="transaction-count">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Cash Payments</h3>
+                        <div class="stat-value" id="cash-total">$0.00</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Card Payments</h3>
+                        <div class="stat-value" id="card-total">$0.00</div>
+                    </div>
+                </div>
+                
+                <div class="worker-stats">
+                    <h3>Worker Performance</h3>
+                    <div id="worker-performance" class="worker-list">
+                        <!-- Worker stats will be populated here -->
+                    </div>
+                </div>
+
+                <div class="recent-transactions">
+                    <h3>Recent Transactions</h3>
+                    <div id="recent-transactions" class="transaction-list">
+                        <!-- Recent transactions will be populated here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Service Entry Section -->
+            <section id="entry" class="section">
+                <h2>New Service Entry</h2>
+                <form id="service-form" class="service-form">
+                    <div class="form-group">
+                        <label for="worker-select">Worker *</label>
+                        <select id="worker-select" name="worker" required>
+                            <option value="">Select Worker</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="service-category">Service Category *</label>
+                        <select id="service-category" name="category" required>
+                            <option value="">Select Category</option>
+                            <option value="Hair Services">Hair Services</option>
+                            <option value="Shaving Services">Shaving Services</option>
+                            <option value="Facial Services">Facial Services</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="service-type">Service Type *</label>
+                        <select id="service-type" name="service" required>
+                            <option value="">Select Service</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="service-cost">Service Cost</label>
+                        <input type="number" id="service-cost" name="cost" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Payment Method *</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="payment" value="Cash" required>
+                                <span>Cash</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="payment" value="Card" required>
+                                <span>Card</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customer-name">Customer Name (Optional)</label>
+                        <input type="text" id="customer-name" name="customer" placeholder="Enter customer name">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="submit-btn">
+                        <span class="btn-text">Submit Entry</span>
+                        <span class="btn-loading" style="display: none;">Submitting...</span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Reports Section -->
+            <section id="reports" class="section">
+                <h2>Reports</h2>
+                <div class="reports-content">
+                    <p>Reports functionality will be implemented in future phases.</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 SalonPro Management System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="message-container" class="message-container"></div>
+
+    <script src="js/services.js"></script>
+    <script src="js/google-integration.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

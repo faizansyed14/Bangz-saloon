@@ -5,9 +5,9 @@
 
 // Supabase Configuration
 const SUPABASE_CONFIG = {
-    // Replace these with your actual Supabase credentials
-    url: 'YOUR_SUPABASE_URL',  // e.g., 'https://your-project.supabase.co'
-    anonKey: 'YOUR_SUPABASE_ANON_KEY'  // e.g., 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+    // Your actual Supabase credentials
+    url: 'https://ryspwycehszeyrdnpzyo.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5c3B3eWNlaHN6ZXlyZG5wenlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyMzY0MzEsImV4cCI6MjA3NDgxMjQzMX0.PQmXYnQeLXyKLEWnfWIGMHj8q3iGxGZMQzGFfurybP0'
 };
 
 // Initialize Supabase with your credentials

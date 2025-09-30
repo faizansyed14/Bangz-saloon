@@ -1,30 +1,34 @@
-# Salon Management System
+# BANGZ SALOON - Professional Salon Management System
 
-A professional, mobile-first web application for hair salon management that replaces manual paper-based logging. The system integrates with Google Sheets for data storage using Google Apps Script.
+A professional, modern, and attractive web application for hair salon management that replaces manual paper-based logging. BANGZ SALOON features a sleek design with gradient colors, modern typography, and an intuitive interface. The system integrates with Google Sheets for data storage using Google Apps Script.
 
 ## 🚀 Features
 
 - **Mobile-First Design**: Optimized for mobile devices with responsive design
 - **Real-Time Data Sync**: Automatic synchronization with Google Sheets
 - **Offline Capability**: Works offline with data sync when connection is restored
-- **Professional UI**: Clean, modern interface with touch-friendly controls
+- **Professional UI**: Modern, attractive interface with gradient designs, premium typography, and touch-friendly controls
 - **Service Management**: Comprehensive service catalog with automatic pricing
 - **Worker Tracking**: Employee performance monitoring and statistics
 - **Daily Dashboard**: Real-time sales and transaction overview
 - **Payment Tracking**: Cash and card payment method tracking
+- **Calendar View**: Interactive calendar to view daily sales with color-coded performance indicators
+- **Monthly Analytics**: Comprehensive monthly sales tracking and reporting
+- **Dubai Timezone**: All timestamps and dates in Dubai, UAE timezone
+- **AED Currency**: All pricing in UAE Dirhams (AED)
 
 ## 📱 Technical Stack
 
 - **Frontend**: HTML5, CSS3, Vanilla JavaScript (ES6+)
 - **Backend**: Google Apps Script
 - **Database**: Google Sheets
-- **Design**: Mobile-first, responsive, professional UI
+- **Design**: Mobile-first, responsive, modern UI with gradient colors and premium typography
 - **No External Libraries**: Pure vanilla implementation
 
 ## 🏗️ Project Structure
 
 ```
-salon-management/
+bangz-saloon-management/
 ├── index.html                 # Main application page
 ├── css/
 │   ├── styles.css            # Main stylesheet
@@ -72,24 +76,24 @@ salon-management/
 The system comes pre-configured with these services:
 
 ### Hair Services
-- Basic Hair Cut: $15
-- Premium Hair Cut: $25
-- Hair Styling: $20
-- Hair Wash & Blow Dry: $12
-- Hair Coloring: $45
-- Hair Treatment: $35
-- Highlights: $60
+- Basic Hair Cut: 55 AED
+- Premium Hair Cut: 92 AED
+- Hair Styling: 73 AED
+- Hair Wash & Blow Dry: 44 AED
+- Hair Coloring: 165 AED
+- Hair Treatment: 128 AED
+- Highlights: 220 AED
 
 ### Shaving Services
-- Basic Shave: $8
-- Premium Shave: $15
-- Beard Trim: $10
-- Mustache Trim: $5
+- Basic Shave: 29 AED
+- Premium Shave: 55 AED
+- Beard Trim: 37 AED
+- Mustache Trim: 18 AED
 
 ### Facial Services
-- Basic Facial: $25
-- Deep Cleansing Facial: $40
-- Anti-Aging Facial: $50
+- Basic Facial: 92 AED
+- Deep Cleansing Facial: 147 AED
+- Anti-Aging Facial: 183 AED
 
 ## 👥 Default Workers
 
@@ -101,18 +105,20 @@ The system comes pre-configured with these services:
 
 ## 📊 Dashboard Features
 
-- **Total Sales**: Today's total revenue
+- **Total Sales**: Today's total revenue in AED
 - **Transaction Count**: Number of services today
-- **Payment Breakdown**: Cash vs Card totals
+- **Payment Breakdown**: Cash vs Card totals in AED
+- **Monthly Overview**: Current month's sales and transaction count
 - **Worker Performance**: Individual worker statistics
-- **Recent Transactions**: Latest service entries
+- **Recent Transactions**: Latest service entries with timestamps
+- **Calendar View**: Interactive monthly calendar with daily sales visualization
 
 ## 🔧 Configuration
 
 ### Google Sheets Structure
 
 #### Transactions Sheet
-- Timestamp, Date, Worker_Name, Service_Type, Service_Cost, Payment_Method, Customer_Name, Month_Year
+- Timestamp, Date, Time, Worker_Name, Service_Type, Service_Cost, Payment_Method, Customer_Name, Month_Year, Year, Month, Day, Location
 
 #### Workers Sheet
 - Worker_Name, Status, Hire_Date, Notes
@@ -124,7 +130,7 @@ The system comes pre-configured with these services:
 - Date, Total_Sales, Transaction_Count, Cash_Total, Card_Total, Worker_Stats
 
 #### Settings Sheet
-- Setting_Name, Setting_Value, Description
+- Setting_Name, Setting_Value, Description (includes salonName, currency: AED, timezone: Asia/Dubai, location: Dubai, UAE)
 
 ## 📱 Mobile Optimization
 
@@ -241,4 +247,4 @@ This project is provided as-is for educational and commercial use. Please ensure
 
 ---
 
-**Built with ❤️ for professional salon management**
+**Built with ❤️ for BANGZ SALOON - Professional salon management with style**

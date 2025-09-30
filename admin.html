@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="BANGZ SALOON - Admin Management System">
+    <title>BANGZ SALOON - Admin Panel | Dubai, UAE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo-container salon-branding">
+                <h1 class="logo">BANGZ SALOON</h1>
+                <p class="location">Dubai, UAE</p>
+            </div>
+            <div class="user-info" id="user-info" style="display: none;">
+                <span id="user-name" class="user-name">Welcome</span>
+            </div>
+            <nav class="nav">
+                <button class="nav-toggle" aria-label="Toggle navigation">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <div class="nav-overlay"></div>
+                <ul class="nav-menu">
+                    <li style="order: 1;"><a href="#dashboard" class="nav-link">Dashboard</a></li>
+                    <li style="order: 2;"><a href="#user-management" class="nav-link">Users</a></li>
+                    <li style="order: 3;"><a href="#create-worker" class="nav-link">Create Worker</a></li>
+                    <li style="order: 4;"><a href="#manage-data" class="nav-link">Manage Data</a></li>
+                    <li style="order: 5;"><a href="#manage-costings" class="nav-link">Manage Costings</a></li>
+                    <li style="order: 6;"><a href="#calendar" class="nav-link">Calendar</a></li>
+                    <li style="order: 7;"><button id="logout-btn" class="logout-btn nav-logout">Logout</button></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main" id="main-content">
+        <div class="container">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="section active">
+                <div class="dashboard-header">
+                    <h2>Admin Dashboard</h2>
+                    <button id="refresh-dashboard" class="btn btn-secondary">Refresh Data</button>
+                </div>
+                
+                <!-- Today's Sales Overview -->
+                <div class="today-sales-section">
+                    <h3>Today's Sales Overview</h3>
+                    <div class="dashboard-grid">
+                        <div class="stat-card">
+                            <h3>Total Sales</h3>
+                            <div class="stat-value" id="admin-today-total-sales">0.00 AED</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Transactions</h3>
+                            <div class="stat-value" id="admin-today-transactions">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Cash Payments</h3>
+                            <div class="stat-value" id="admin-today-cash">0.00 AED</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Card Payments</h3>
+                            <div class="stat-value" id="admin-today-card">0.00 AED</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Overall Statistics -->
+                <div class="overall-stats-section">
+                    <h3>Overall Statistics</h3>
+                    <div class="dashboard-grid">
+                        <div class="stat-card">
+                            <h3>Total Sales</h3>
+                            <div class="stat-value" id="total-sales">0.00 AED</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Total Transactions</h3>
+                            <div class="stat-value" id="transaction-count">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Active Workers</h3>
+                            <div class="stat-value" id="active-workers">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Total Revenue</h3>
+                            <div class="stat-value" id="total-revenue">0.00 AED</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="monthly-stats">
+                    <h3>Monthly Overview</h3>
+                    <div class="monthly-grid">
+                        <div class="stat-card">
+                            <h3>This Month</h3>
+                            <div class="stat-value" id="monthly-sales">0.00 AED</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Monthly Transactions</h3>
+                            <div class="stat-value" id="monthly-transactions">0</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Create Worker Section -->
+            <section id="create-worker" class="section">
+                <h2>Create New Worker</h2>
+                <div class="create-worker-container">
+                    <form id="create-worker-form" class="create-worker-form form-luxury">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="worker-name">Worker Name *</label>
+                                <input type="text" id="worker-name" name="name" required placeholder="Enter worker name">
+                            </div>
+                            <div class="form-group">
+                                <label for="worker-role">Role *</label>
+                                <select id="worker-role" name="role" required>
+                                    <option value="">Select Role</option>
+                                    <option value="Stylist">Stylist</option>
+                                    <option value="Barber">Barber</option>
+                                    <option value="Hair Colorist">Hair Colorist</option>
+                                    <option value="Manager">Manager</option>
+                                    <option value="Receptionist">Receptionist</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="worker-phone">Phone</label>
+                                <input type="tel" id="worker-phone" name="phone" placeholder="Enter worker phone">
+                            </div>
+                            <div class="form-group">
+                                <label for="worker-status">Status *</label>
+                                <select id="worker-status" name="status" required>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                    <option value="On Leave">On Leave</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-luxury" id="create-worker-btn">
+                            <span class="btn-text">Create Worker</span>
+                            <span class="btn-loading" style="display: none;">Creating...</span>
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- User Management Section -->
+            <section id="user-management" class="section">
+                <h2>User Management</h2>
+                <div class="user-management-container">
+                    <!-- Create User -->
+                    <div class="data-section">
+                        <h3>Create New User</h3>
+                        <div class="create-user-container">
+                            <form id="create-user-form" class="create-user-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="user-name">Full Name *</label>
+                                        <input type="text" id="user-name" name="name" required placeholder="Enter full name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="user-email">Email *</label>
+                                        <input type="email" id="user-email" name="email" required placeholder="Enter email address">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="user-password">Password *</label>
+                                        <input type="password" id="user-password" name="password" required placeholder="Enter password">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="user-role">Role *</label>
+                                        <select id="user-role" name="role" required>
+                                            <option value="">Select Role</option>
+                                            <option value="Admin">Admin</option>
+                                            <option value="Worker">Worker</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="user-phone">Phone</label>
+                                        <input type="tel" id="user-phone" name="phone" placeholder="Enter phone number">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="user-status">Status *</label>
+                                        <select id="user-status" name="status" required>
+                                            <option value="Active">Active</option>
+                                            <option value="Inactive">Inactive</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary" id="create-user-btn">
+                                    <span class="btn-text">Create User</span>
+                                    <span class="btn-loading" style="display: none;">Creating...</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Users List -->
+                    <div class="data-section">
+                        <h3>System Users</h3>
+                        <div class="users-table-container">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Phone</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-table-body">
+                                    <!-- Users will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Manage Data Section -->
+            <section id="manage-data" class="section">
+                <h2>Manage Data</h2>
+                
+                <div class="manage-data-container">
+                    <!-- Workers Management -->
+                    <div class="data-section">
+                        <h3>Workers Management</h3>
+                        <div class="workers-table-container">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Role</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="workers-table-body">
+                                    <!-- Workers will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- All Transactions -->
+                    <div class="data-section">
+                        <h3>All Transactions</h3>
+                        <div class="transactions-table-container">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Time</th>
+                                        <th>Worker</th>
+                                        <th>Service</th>
+                                        <th>Category</th>
+                                        <th>Customer</th>
+                                        <th>Amount</th>
+                                        <th>Payment</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactions-table-body">
+                                    <!-- Transactions will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Manage Costings Section -->
+            <section id="manage-costings" class="section">
+                <div class="costings-header">
+                    <h2>Manage Services & Costings</h2>
+                    <div class="costings-actions">
+                        <button id="add-service-btn" class="btn btn-primary">Add New Service</button>
+                        <button id="refresh-costings-btn" class="btn btn-secondary">Refresh Data</button>
+                    </div>
+                </div>
+
+                <!-- Add/Edit Service Modal -->
+                <div id="service-modal" class="modal" style="display: none;">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 id="modal-title">Add New Service</h3>
+                            <span class="close" id="close-modal">&times;</span>
+                        </div>
+                        <div class="modal-body">
+                            <form id="service-form">
+                                <div class="form-group">
+                                    <label for="service-category">Category *</label>
+                                    <select id="service-category" name="category" required>
+                                        <option value="">Select Category</option>
+                                        <option value="Promotional">Promotional</option>
+                                        <option value="Normal">Normal</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="service-name">Service Name *</label>
+                                    <input type="text" id="service-name" name="serviceName" placeholder="Enter service name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="service-cost">Cost (AED) *</label>
+                                    <input type="number" id="service-cost" name="cost" placeholder="Enter cost in AED" min="0" step="0.01" required>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="button" id="cancel-service-btn" class="btn btn-secondary">Cancel</button>
+                                    <button type="submit" id="save-service-btn" class="btn btn-primary">Save Service</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Services Table -->
+                <div class="costings-table-container">
+                    <table class="costings-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Service Name</th>
+                                <th>Cost (AED)</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="costings-table-body">
+                            <!-- Services data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="costings-summary">
+                    <div class="summary-cards">
+                        <div class="summary-card">
+                            <h3>Total Services</h3>
+                            <div class="summary-value" id="total-services-count">0</div>
+                        </div>
+                        <div class="summary-card">
+                            <h3>Promotional Services</h3>
+                            <div class="summary-value" id="promotional-services-count">0</div>
+                        </div>
+                        <div class="summary-card">
+                            <h3>Normal Services</h3>
+                            <div class="summary-value" id="normal-services-count">0</div>
+                        </div>
+                        <div class="summary-card">
+                            <h3>Average Cost</h3>
+                            <div class="summary-value" id="average-cost">0.00 AED</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Calendar Section -->
+            <section id="calendar" class="section">
+                <div class="calendar-header">
+                    <h2>Calendar</h2>
+                </div>
+                <div class="calendar-picker-container">
+                    <div class="calendar-picker" id="admin-calendar-picker">
+                        <!-- Modern calendar will be rendered here -->
+                    </div>
+                    <div class="selected-date-info">
+                        <span id="admin-selected-date-display">Select a date to view sales data</span>
+                    </div>
+                    <div class="calendar-actions">
+                        <button id="admin-show-all-calendar-btn" class="btn btn-primary">Show All</button>
+                        <button id="admin-download-selected-excel-btn" class="btn btn-success">Download Selected Date</button>
+                        <button id="admin-download-all-excel-btn" class="btn btn-secondary">Download All Transactions</button>
+                    </div>
+                </div>
+                
+                <div class="sales-summary">
+                    <div class="summary-cards">
+                        <div class="summary-card">
+                            <h3>Total Sales Today</h3>
+                            <div class="summary-value" id="admin-total-sales-today">0.00 AED</div>
+                        </div>
+                        <div class="summary-card">
+                            <h3>Total Transactions</h3>
+                            <div class="summary-value" id="admin-total-transactions-today">0</div>
+                        </div>
+                        <div class="summary-card">
+                            <h3>Active Workers</h3>
+                            <div class="summary-value" id="admin-active-workers-today">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="worker-sales-container">
+                    <h3>Sales by Worker</h3>
+                    <div id="admin-worker-sales-list">
+                        <!-- Worker sales data will be loaded here -->
+                    </div>
+                </div>
+
+                <div class="daily-sales-table-container">
+                    <h3>Daily Sales Breakdown</h3>
+                    <table class="sales-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Worker</th>
+                                <th>Service</th>
+                                <th>Category</th>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Payment</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-daily-sales-table-body">
+                            <!-- Sales data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 BANGZ SALOON Management System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="message-container" class="message-container"></div>
+
+    <!-- Edit User Modal -->
+    <div id="edit-user-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit User</h3>
+                <button class="modal-close" id="close-edit-user-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-user-form">
+                    <input type="hidden" id="edit-user-id" name="id">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-user-name">Full Name *</label>
+                            <input type="text" id="edit-user-name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-user-email">Email *</label>
+                            <input type="email" id="edit-user-email" name="email" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-user-password">Password *</label>
+                            <input type="password" id="edit-user-password" name="password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-user-role">Role *</label>
+                            <select id="edit-user-role" name="role" required>
+                                <option value="Admin">Admin</option>
+                                <option value="Worker">Worker</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-user-phone">Phone</label>
+                            <input type="tel" id="edit-user-phone" name="phone">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-user-status">Status *</label>
+                            <select id="edit-user-status" name="status" required>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" id="cancel-edit-user">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Worker Modal -->
+    <div id="edit-worker-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Worker</h3>
+                <button class="modal-close" id="close-edit-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-worker-form">
+                    <input type="hidden" id="edit-worker-id" name="id">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-worker-name">Worker Name *</label>
+                            <input type="text" id="edit-worker-name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-worker-role">Role *</label>
+                            <select id="edit-worker-role" name="role" required>
+                                <option value="Stylist">Stylist</option>
+                                <option value="Barber">Barber</option>
+                                <option value="Hair Colorist">Hair Colorist</option>
+                                <option value="Manager">Manager</option>
+                                <option value="Receptionist">Receptionist</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-worker-email">Email *</label>
+                            <input type="email" id="edit-worker-email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-worker-phone">Phone</label>
+                            <input type="tel" id="edit-worker-phone" name="phone">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-worker-password">Password *</label>
+                            <input type="password" id="edit-worker-password" name="password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-worker-status">Status *</label>
+                            <select id="edit-worker-status" name="status" required>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                                <option value="On Leave">On Leave</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" id="cancel-edit">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Worker</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase CDN -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-integration.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/admin-main.js"></script>
+    
+    <script>
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if user is authenticated and is admin
+            const sessionData = localStorage.getItem('bangz_saloon_session');
+            if (!sessionData) {
+                // Redirect to login page
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            try {
+                const session = JSON.parse(sessionData);
+                const now = new Date().getTime();
+                
+                if (session.expiresAt <= now) {
+                    // Session expired, redirect to login
+                    localStorage.removeItem('bangz_saloon_session');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                // Check if user is admin
+                if (session.user.role !== 'Admin') {
+                    // Redirect to worker page
+                    window.location.href = 'index.html';
+                    return;
+                }
+            } catch (error) {
+                // Invalid session data, redirect to login
+                localStorage.removeItem('bangz_saloon_session');
+                window.location.href = 'login.html';
+                return;
+            }
+        });
+    </script>
+</body>
+</html>

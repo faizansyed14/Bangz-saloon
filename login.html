@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="BANGZ SALOON - Professional salon management system login">
+    <title>BANGZ SALOON - Login | Dubai, UAE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
+    <style>
+        /* Login Page Specific Styles */
+        body {
+            background: linear-gradient(135deg, var(--background-color) 0%, #1A1A1A 50%, var(--surface-elevated) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(212, 175, 55, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
+            z-index: -1;
+            animation: backgroundShift 20s ease-in-out infinite;
+        }
+
+        .login-container {
+            background: linear-gradient(135deg, rgba(26, 26, 26, 0.95) 0%, rgba(42, 42, 42, 0.95) 100%);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl), 0 0 40px rgba(212, 175, 55, 0.2);
+            padding: var(--spacing-10);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color) 0%, #FFD700 50%, var(--accent-color) 100%);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: var(--spacing-8);
+        }
+
+        .login-logo {
+            font-family: var(--font-family-display);
+            font-size: var(--font-size-3xl);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #FFD700 50%, var(--accent-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--spacing-2);
+            animation: logoGlow 3s ease-in-out infinite alternate;
+        }
+
+        .login-location {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-6);
+        }
+
+        .login-subtitle {
+            font-size: var(--font-size-lg);
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .login-info {
+            background-color: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-4);
+            margin-top: var(--spacing-4);
+            font-size: var(--font-size-sm);
+        }
+
+        .login-info p {
+            margin: var(--spacing-1) 0;
+            color: var(--text-secondary);
+        }
+
+        .login-info strong {
+            color: var(--primary-color);
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-6);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-2);
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: var(--font-size-sm);
+        }
+
+        .form-group input {
+            padding: var(--spacing-4);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-base);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: var(--surface-elevated);
+            color: var(--text-primary);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2), 0 0 20px rgba(212, 175, 55, 0.1);
+            transform: translateY(-1px);
+            background-color: var(--surface-color);
+        }
+
+        .form-group input:hover {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.1);
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #FFD700 50%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: var(--spacing-4);
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .login-btn:hover {
+            background: linear-gradient(135deg, #FFD700 0%, var(--primary-color) 50%, var(--accent-color) 100%);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4), 0 0 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .login-btn:disabled {
+            background: var(--secondary-color);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .login-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .login-btn:hover::before {
+            left: 100%;
+        }
+
+        .error-message {
+            background-color: var(--error-color);
+            color: white;
+            padding: var(--spacing-3);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-sm);
+            text-align: center;
+            margin-top: var(--spacing-4);
+        }
+
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: var(--spacing-2);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-top: var(--spacing-4);
+        }
+
+        .forgot-password a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+
+        /* Mobile Responsive */
+        @media screen and (max-width: 480px) {
+            .login-container {
+                padding: var(--spacing-6);
+                margin: var(--spacing-2);
+            }
+
+            .login-logo {
+                font-size: var(--font-size-2xl);
+            }
+
+            .login-subtitle {
+                font-size: var(--font-size-base);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1 class="login-logo">BANGZ SALOON</h1>
+            <p class="login-location">Dubai, UAE</p>
+            <p class="login-subtitle">Professional Salon Management</p>
+        </div>
+
+        <form id="login-form" class="login-form">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required placeholder="Enter your email">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required placeholder="Enter your password">
+            </div>
+
+            <button type="submit" id="login-btn" class="login-btn">
+                <span id="login-text">Sign In</span>
+                <span id="login-loading" style="display: none;">
+                    <span class="loading-spinner"></span>
+                    Signing In...
+                </span>
+            </button>
+
+            <div id="error-message" class="error-message" style="display: none;"></div>
+        </form>
+
+        <div class="forgot-password">
+            <a href="#" id="forgot-password-link">Forgot Password?</a>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p>Authenticating...</p>
+    </div>
+
+    <!-- Supabase CDN -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-integration.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>

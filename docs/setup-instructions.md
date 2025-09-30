@@ -1,7 +1,7 @@
-# Salon Management System - Setup Instructions
+# BANGZ SALOON - Professional Salon Management System Setup Instructions
 
 ## Overview
-This is a professional hair salon management system that replaces manual paper-based logging. The system integrates with Google Sheets for data storage using Google Apps Script.
+BANGZ SALOON is a professional hair salon management system that replaces manual paper-based logging. The system integrates with Google Sheets for data storage using Google Apps Script, featuring a modern, attractive interface designed for professional salon operations.
 
 ## Prerequisites
 - Google account with access to Google Sheets and Google Apps Script
@@ -13,7 +13,7 @@ This is a professional hair salon management system that replaces manual paper-b
 ### Step 1: Create Google Sheets Workbook
 1. Go to [Google Sheets](https://sheets.google.com)
 2. Create a new spreadsheet
-3. Name it "Salon Management Data"
+3. Name it "BANGZ SALOON Management Data"
 4. Create the following sheets:
 
 #### Sheet 1: Transactions
@@ -96,7 +96,7 @@ Facial Services | Anti-Aging Facial | 50 | Active
 ### Step 1: Create Apps Script Project
 1. Go to [Google Apps Script](https://script.google.com)
 2. Click "New Project"
-3. Name it "Salon Management Backend"
+3. Name it "BANGZ SALOON Backend"
 
 ### Step 2: Add the Backend Code
 Replace the default code with the provided Google Apps Script code (see `google-apps-script.js` file)

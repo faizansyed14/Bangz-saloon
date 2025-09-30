@@ -2,41 +2,56 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Professional hair salon management system">
-    <title>Salon Management System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="BANGZ SALOON - Professional hair salon management system in Dubai, UAE">
+    <title>BANGZ SALOON - Professional Salon Management | Dubai, UAE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/mobile.css">
     <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
 </head>
 <body>
     <header class="header">
         <div class="container">
-            <h1 class="logo">SalonPro</h1>
+            <div class="logo-container salon-branding">
+                <h1 class="logo">BANGZ SALOON</h1>
+                <p class="location">Dubai, UAE</p>
+            </div>
+            <div class="user-info" id="user-info" style="display: none;">
+                <span id="user-name" class="user-name">Welcome</span>
+            </div>
             <nav class="nav">
                 <button class="nav-toggle" aria-label="Toggle navigation">
                     <span></span>
                     <span></span>
                     <span></span>
                 </button>
+                <div class="nav-overlay"></div>
                 <ul class="nav-menu">
-                    <li><a href="#dashboard" class="nav-link">Dashboard</a></li>
-                    <li><a href="#entry" class="nav-link">New Entry</a></li>
-                    <li><a href="#reports" class="nav-link">Reports</a></li>
+                    <li style="order: 1;"><a href="admin.html" class="nav-link" id="admin-link" style="display: none;">Admin Panel</a></li>
+                    <li style="order: 2;"><a href="#dashboard" class="nav-link">Dashboard</a></li>
+                    <li style="order: 3;"><a href="#entry" class="nav-link">New Entry</a></li>
+                    <li style="order: 4;"><a href="#calendar" class="nav-link">Calendar</a></li>
+                    <li style="order: 5;"><button id="logout-btn" class="logout-btn nav-logout">Logout</button></li>
                 </ul>
             </nav>
         </div>
     </header>
 
-    <main class="main">
+
+    <main class="main" id="main-content" style="display: none;">
         <div class="container">
             <!-- Dashboard Section -->
             <section id="dashboard" class="section active">
-                <h2>Today's Overview</h2>
+                <div class="dashboard-header">
+                    <h2>Today's Overview</h2>
+                    <button id="refresh-data" class="btn btn-secondary">Refresh Data</button>
+                </div>
                 <div class="dashboard-grid">
                     <div class="stat-card">
                         <h3>Total Sales</h3>
-                        <div class="stat-value" id="total-sales">$0.00</div>
+                        <div class="stat-value" id="total-sales">0.00 AED</div>
                     </div>
                     <div class="stat-card">
                         <h3>Transactions</h3>
@@ -44,11 +59,25 @@
                     </div>
                     <div class="stat-card">
                         <h3>Cash Payments</h3>
-                        <div class="stat-value" id="cash-total">$0.00</div>
+                        <div class="stat-value" id="cash-total">0.00 AED</div>
                     </div>
                     <div class="stat-card">
                         <h3>Card Payments</h3>
-                        <div class="stat-value" id="card-total">$0.00</div>
+                        <div class="stat-value" id="card-total">0.00 AED</div>
+                    </div>
+                </div>
+                
+                <div class="monthly-stats">
+                    <h3>Monthly Overview</h3>
+                    <div class="monthly-grid">
+                        <div class="stat-card">
+                            <h3>This Month</h3>
+                            <div class="stat-value" id="monthly-sales">0.00 AED</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Monthly Transactions</h3>
+                            <div class="stat-value" id="monthly-transactions">0</div>
+                        </div>
                     </div>
                 </div>
                 
@@ -70,7 +99,7 @@
             <!-- Service Entry Section -->
             <section id="entry" class="section">
                 <h2>New Service Entry</h2>
-                <form id="service-form" class="service-form">
+                <form id="service-form" class="service-form form-luxury">
                     <div class="form-group">
                         <label for="worker-select">Worker *</label>
                         <select id="worker-select" name="worker" required>
@@ -82,22 +111,33 @@
                         <label for="service-category">Service Category *</label>
                         <select id="service-category" name="category" required>
                             <option value="">Select Category</option>
-                            <option value="Hair Services">Hair Services</option>
-                            <option value="Shaving Services">Shaving Services</option>
-                            <option value="Facial Services">Facial Services</option>
+                            <option value="Normal">Normal</option>
+                            <option value="Promotional">Promotional</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label for="service-type">Service Type *</label>
-                        <select id="service-type" name="service" required>
-                            <option value="">Select Service</option>
-                        </select>
+                        <label>Select Services *</label>
+                        <div id="service-categories" class="service-categories">
+                            <p class="no-category-selected">Please select a service category first</p>
+                        </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="service-cost">Service Cost</label>
-                        <input type="number" id="service-cost" name="cost" readonly>
+                        <label>Selected Services</label>
+                        <div id="selected-services" class="selected-services">
+                            <p class="no-services">No services selected</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="total-cost">Total Cost</label>
+                        <input type="number" id="total-cost" name="cost" readonly value="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tip-amount">Tip Amount (Optional)</label>
+                        <input type="number" id="tip-amount" name="tip" min="0" step="0.01" placeholder="0.00" value="0">
                     </div>
 
                     <div class="form-group">
@@ -119,18 +159,77 @@
                         <input type="text" id="customer-name" name="customer" placeholder="Enter customer name">
                     </div>
 
-                    <button type="submit" class="btn btn-primary" id="submit-btn">
+                    <div class="form-group">
+                        <label for="customer-phone">Customer Phone (Optional)</label>
+                        <input type="tel" id="customer-phone" name="phone" placeholder="Enter customer phone number">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-luxury" id="submit-btn">
                         <span class="btn-text">Submit Entry</span>
                         <span class="btn-loading" style="display: none;">Submitting...</span>
                     </button>
                 </form>
             </section>
 
-            <!-- Reports Section -->
-            <section id="reports" class="section">
-                <h2>Reports</h2>
-                <div class="reports-content">
-                    <p>Reports functionality will be implemented in future phases.</p>
+
+
+            <!-- Calendar Section -->
+            <section id="calendar" class="section">
+                <div class="calendar-header">
+                    <h2>Calendar</h2>
+                </div>
+                <div class="calendar-picker-container">
+                    <div class="calendar-picker" id="calendar-picker">
+                        <!-- Modern calendar will be rendered here -->
+                    </div>
+                    <div class="selected-date-info">
+                        <span id="selected-date-display">Select a date to view sales data</span>
+                    </div>
+                </div>
+                
+                <div class="sales-summary">
+                    <div class="summary-cards">
+                        <div class="summary-card">
+                            <h3>Total Sales Today</h3>
+                            <div class="summary-value" id="total-sales-today">0.00 AED</div>
+                        </div>
+                        <div class="summary-card">
+                            <h3>Total Transactions</h3>
+                            <div class="summary-value" id="total-transactions-today">0</div>
+                        </div>
+                        <div class="summary-card">
+                            <h3>Active Workers</h3>
+                            <div class="summary-value" id="active-workers-today">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="worker-sales-container">
+                    <h3>Sales by Worker</h3>
+                    <div id="worker-sales-list">
+                        <!-- Worker sales data will be loaded here -->
+                    </div>
+                </div>
+
+                <div class="daily-sales-table-container">
+                    <h3>Daily Sales Breakdown</h3>
+                    <table class="sales-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Worker</th>
+                                <th>Service</th>
+                                <th>Category</th>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Payment</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="daily-sales-table-body">
+                            <!-- Sales data will be loaded here -->
+                        </tbody>
+                    </table>
                 </div>
             </section>
         </div>
@@ -138,7 +237,7 @@
 
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2024 SalonPro Management System. All rights reserved.</p>
+            <p>&copy; 2024 BANGZ SALOON Management System. All rights reserved.</p>
         </div>
     </footer>
 
@@ -149,10 +248,50 @@
     </div>
 
     <!-- Success/Error Messages -->
-    <div id="message-container" class="message-container"></div>
+    <!-- New Popup System -->
+    <div id="success-popup" class="success-popup">
+        <div class="popup-content">
+            <div class="popup-icon">✓</div>
+            <div class="popup-title">New Entry Added!</div>
+            <div class="popup-message"></div>
+            <div class="popup-details"></div>
+        </div>
+    </div>
 
-    <script src="js/services.js"></script>
-    <script src="js/google-integration.js"></script>
+    <!-- Supabase CDN -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-integration.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/main.js"></script>
+    
+    <script>
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if user is authenticated
+            const sessionData = localStorage.getItem('bangz_saloon_session');
+            if (!sessionData) {
+                // Redirect to login page
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            try {
+                const session = JSON.parse(sessionData);
+                const now = new Date().getTime();
+                
+                if (session.expiresAt <= now) {
+                    // Session expired, redirect to login
+                    localStorage.removeItem('bangz_saloon_session');
+                    window.location.href = 'login.html';
+                    return;
+                }
+            } catch (error) {
+                // Invalid session data, redirect to login
+                localStorage.removeItem('bangz_saloon_session');
+                window.location.href = 'login.html';
+                return;
+            }
+        });
+    </script>
 </body>
 </html>

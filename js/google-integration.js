@@ -1,12 +1,12 @@
 /**
- * Salon Management System - Google Integration
- * Handles communication with Google Apps Script and Google Sheets
+ * BANGZ SALOON - Professional Salon Management System
+ * Google Integration - Handles communication with Google Apps Script and Google Sheets
  */
 
 class GoogleIntegration {
     constructor() {
         // This will be set when the Google Apps Script is deployed
-        this.scriptUrl = ''; // To be configured with actual Google Apps Script URL
+        this.scriptUrl = 'https://script.google.com/macros/s/AKfycbx5dz53IVe9uGyWWzRmGeloW7SoWMZ4ZnHyFamflAMtnfo_Za4tpK0WO2Z5JpOcbHdW/exec';
         this.isOnline = navigator.onLine;
         this.offlineData = this.loadOfflineData();
         
@@ -53,31 +53,68 @@ class GoogleIntegration {
 
         const url = `${this.scriptUrl}?endpoint=${endpoint}`;
         
-        const requestOptions = {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        };
-
-        if (method === 'POST' && Object.keys(data).length > 0) {
-            requestOptions.body = JSON.stringify(data);
-        }
-
-        try {
-            console.log(`[${new Date().toISOString()}] 🔄 Making request to ${endpoint}`);
-            const response = await fetch(url, requestOptions);
+        let requestOptions;
+        
+        if (method === 'GET') {
+            // For GET requests, add data as URL parameters
+            const params = new URLSearchParams();
+            Object.keys(data).forEach(key => {
+                if (data[key] !== undefined && data[key] !== null) {
+                    params.append(key, data[key]);
+                }
+            });
+            const getUrl = params.toString() ? `${url}&${params.toString()}` : url;
             
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            requestOptions = {
+                method: 'GET'
+            };
+            
+            try {
+                console.log(`[${new Date().toISOString()}] 🔄 Making GET request to ${endpoint}`);
+                console.log(`[${new Date().toISOString()}] 📤 Request data:`, data);
+                console.log(`[${new Date().toISOString()}] 📤 Request URL:`, getUrl);
+                const response = await fetch(getUrl, requestOptions);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log(`[${new Date().toISOString()}] ✅ Request successful: ${endpoint}`);
+                console.log(`[${new Date().toISOString()}] 📥 Response data:`, result);
+                return result;
+            } catch (error) {
+                console.error(`[${new Date().toISOString()}] ❌ GET Request failed: ${endpoint}`, error);
+                throw error;
             }
+        } else {
+            // For POST requests, use FormData to avoid CORS preflight
+            const formData = new FormData();
+            formData.append('data', JSON.stringify(data));
             
-            const result = await response.json();
-            console.log(`[${new Date().toISOString()}] ✅ Request successful: ${endpoint}`);
-            return result;
-        } catch (error) {
-            console.error(`[${new Date().toISOString()}] ❌ Request failed: ${endpoint}`, error);
-            throw error;
+            requestOptions = {
+                method: 'POST',
+                body: formData
+            };
+
+            try {
+                console.log(`[${new Date().toISOString()}] 🔄 Making POST request to ${endpoint}`);
+                console.log(`[${new Date().toISOString()}] 📤 Request data:`, data);
+                console.log(`[${new Date().toISOString()}] 📤 Request URL:`, url);
+                const response = await fetch(url, requestOptions);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log(`[${new Date().toISOString()}] ✅ Request successful: ${endpoint}`);
+                console.log(`[${new Date().toISOString()}] 📥 Response data:`, result);
+                return result;
+            } catch (error) {
+                console.error(`[${new Date().toISOString()}] ❌ POST Request failed: ${endpoint}`, error);
+                throw error;
+            }
         }
     }
 
@@ -92,7 +129,7 @@ class GoogleIntegration {
                 return this.handleOfflineSubmission(entryData);
             }
 
-            const result = await this.makeRequest('addServiceEntry', entryData);
+            const result = await this.makeRequest('createTransaction', entryData);
             
             if (result.success) {
                 console.log(`[${new Date().toISOString()}] ✅ Service entry submitted successfully`);
@@ -159,16 +196,33 @@ class GoogleIntegration {
     async getServices() {
         try {
             if (!this.isOnline) {
+                console.log(`[${new Date().toISOString()}] 📴 Offline mode, using offline services`);
                 return this.getOfflineServices();
             }
 
+            console.log(`[${new Date().toISOString()}] 🌐 Online mode, fetching services from API`);
             const result = await this.makeRequest('getServices', {}, 'GET');
-            return result.data || {};
+            console.log(`[${new Date().toISOString()}] 📊 Services API response:`, result);
+            
+            if (result && result.success) {
+                console.log(`[${new Date().toISOString()}] ✅ Services loaded from API:`, result.data);
+                return result.data || {};
+            } else {
+                console.log(`[${new Date().toISOString()}] ⚠️ API failed, using offline services:`, result?.error);
+                return this.getOfflineServices();
+            }
         } catch (error) {
             console.error(`[${new Date().toISOString()}] ❌ Error getting services:`, error);
+            console.log(`[${new Date().toISOString()}] 🔄 Falling back to offline services`);
             return this.getOfflineServices();
         }
     }
+
+    /**
+     * Get services by category
+     * @param {string} category - Category name (Normal or Promotional)
+     * @returns {Promise} Services object for the category
+     */
 
     /**
      * Get daily data for dashboard
@@ -181,12 +235,243 @@ class GoogleIntegration {
                 return this.getOfflineDailyData(date);
             }
 
-            const result = await this.makeRequest('getDailyData', { date }, 'GET');
-            return result.data || this.getEmptyDailyData();
+            console.log(`[${new Date().toISOString()}] 🔍 Requesting daily data for date: "${date}"`);
+            
+            // Try getDailyData first, fallback to getAllTransactions if not available
+            try {
+                const result = await this.makeRequest('getDailyData', { date }, 'GET');
+                if (result.success) {
+                    console.log(`[${new Date().toISOString()}] 📊 Daily data response:`, result);
+                    return result.data || this.getEmptyDailyData();
+                } else {
+                    console.log(`[${new Date().toISOString()}] ⚠️ getDailyData failed, falling back to getAllTransactions:`, result.error);
+                }
+            } catch (error) {
+                console.log(`[${new Date().toISOString()}] ⚠️ getDailyData error, falling back to getAllTransactions:`, error);
+            }
+            
+            // Fallback: Get all transactions and filter on client side
+            console.log(`[${new Date().toISOString()}] 🔄 Using fallback method: getTransactions`);
+            const allTransactionsResult = await this.makeRequest('getTransactions');
+            console.log(`[${new Date().toISOString()}] 📊 All transactions response:`, allTransactionsResult);
+            
+            if (allTransactionsResult && allTransactionsResult.success && allTransactionsResult.data) {
+                return this.filterTransactionsForDate(allTransactionsResult.data, date);
+            } else {
+                console.log(`[${new Date().toISOString()}] ⚠️ getTransactions failed, using empty data`);
+                return this.getEmptyDailyData();
+            }
         } catch (error) {
             console.error(`[${new Date().toISOString()}] ❌ Error getting daily data:`, error);
             return this.getOfflineDailyData(date);
         }
+    }
+
+    /**
+     * Get all sales data with worker breakdown
+     * @param {string} date - Optional date filter
+     * @returns {Object} All sales data with worker stats
+     */
+    async getAllSales(date = null) {
+        try {
+            if (!this.isOnline) {
+                return this.getOfflineAllSalesData(date);
+            }
+
+            console.log(`[${new Date().toISOString()}] 🔍 Requesting all sales data for date: "${date || 'all'}"`);
+            
+            const result = await this.makeRequest('getAllSales', { date }, 'GET');
+            
+            if (result && result.success) {
+                console.log(`[${new Date().toISOString()}] 📊 All sales data response:`, result);
+                return result;
+            } else {
+                console.log(`[${new Date().toISOString()}] ⚠️ getAllSales failed, falling back to getTransactions:`, result?.error);
+                
+                // Fallback: Get all transactions and process on client side
+                const allTransactionsResult = await this.makeRequest('getTransactions', {}, 'GET');
+                console.log(`[${new Date().toISOString()}] 📊 All transactions response:`, allTransactionsResult);
+                
+                if (allTransactionsResult && allTransactionsResult.success && (allTransactionsResult.data || allTransactionsResult.transactions)) {
+                    const transactions = allTransactionsResult.data || allTransactionsResult.transactions;
+                    return this.processAllSalesData(transactions, date);
+                } else {
+                    console.log(`[${new Date().toISOString()}] ⚠️ getTransactions failed, using empty data`);
+                    return this.getEmptyAllSalesData();
+                }
+            }
+        } catch (error) {
+            console.error(`[${new Date().toISOString()}] ❌ Error getting all sales data:`, error);
+            return this.getOfflineAllSalesData(date);
+        }
+    }
+
+    /**
+     * Process all sales data from transactions
+     * @param {Array} transactions - All transactions
+     * @param {string} targetDate - Optional date filter
+     * @returns {Object} Processed all sales data
+     */
+    processAllSalesData(transactions, targetDate = null) {
+        console.log(`[${new Date().toISOString()}] 🔍 Processing ${transactions.length} transactions for all sales data`);
+        console.log(`[${new Date().toISOString()}] 📊 Sample transaction:`, transactions[0]);
+        
+        // Filter transactions if date is specified
+        let filteredTransactions = transactions;
+        if (targetDate) {
+            filteredTransactions = transactions.filter(transaction => {
+                const transactionDate = transaction.date || transaction.Date;
+                console.log(`[${new Date().toISOString()}] 📅 Checking transaction date: "${transactionDate}" vs target: "${targetDate}"`);
+                return transactionDate === targetDate;
+            });
+        }
+        
+        console.log(`[${new Date().toISOString()}] 📊 Filtered transactions:`, filteredTransactions.length);
+        
+        // Calculate worker statistics
+        const workerStats = {};
+        let totalSales = 0;
+        let totalTransactions = filteredTransactions.length;
+        let cashTotal = 0;
+        let cardTotal = 0;
+        
+        filteredTransactions.forEach(transaction => {
+            const worker = transaction.worker || transaction.Worker;
+            const amount = parseFloat(transaction.amount || transaction.Amount) || 0;
+            const paymentMethod = transaction.paymentMethod || transaction.Payment_Method || transaction.Payment;
+            
+            console.log(`[${new Date().toISOString()}] 💰 Processing transaction - Worker: ${worker}, Amount: ${amount}, Payment: ${paymentMethod}`);
+            
+            if (!workerStats[worker]) {
+                workerStats[worker] = {
+                    total: 0,
+                    count: 0,
+                    cashTotal: 0,
+                    cardTotal: 0,
+                    transactions: []
+                };
+            }
+            
+            workerStats[worker].total += amount;
+            workerStats[worker].count += 1;
+            workerStats[worker].transactions.push(transaction);
+            
+            if (paymentMethod === 'Cash') {
+                workerStats[worker].cashTotal += amount;
+                cashTotal += amount;
+            } else if (paymentMethod === 'Card') {
+                workerStats[worker].cardTotal += amount;
+                cardTotal += amount;
+            }
+            
+            totalSales += amount;
+        });
+        
+        const processedData = {
+            date: targetDate || new Date().toLocaleDateString('en-GB'),
+            totalSales: totalSales,
+            totalTransactions: totalTransactions,
+            cashTotal: cashTotal,
+            cardTotal: cardTotal,
+            workerStats: workerStats,
+            transactions: filteredTransactions
+        };
+        
+        console.log(`[${new Date().toISOString()}] 📊 Processed all sales data:`, processedData);
+        return { success: true, data: processedData };
+    }
+
+    /**
+     * Get empty all sales data structure
+     * @returns {Object} Empty all sales data
+     */
+    getEmptyAllSalesData() {
+        return {
+            success: true,
+            data: {
+                date: new Date().toLocaleDateString('en-GB'),
+                totalSales: 0,
+                totalTransactions: 0,
+                cashTotal: 0,
+                cardTotal: 0,
+                workerStats: {},
+                transactions: []
+            }
+        };
+    }
+
+    /**
+     * Get offline all sales data
+     * @param {string} date - Date filter
+     * @returns {Object} Offline all sales data
+     */
+    getOfflineAllSalesData(date) {
+        console.log(`[${new Date().toISOString()}] 📱 Using offline all sales data for date: "${date || 'all'}"`);
+        return this.getEmptyAllSalesData();
+    }
+
+    /**
+     * Filter transactions for a specific date
+     * @param {Array} transactions - All transactions
+     * @param {string} targetDate - Date to filter for
+     * @returns {Object} Daily data object
+     */
+    filterTransactionsForDate(transactions, targetDate) {
+        console.log(`[${new Date().toISOString()}] 🔍 Filtering ${transactions.length} transactions for date: "${targetDate}"`);
+        
+        // Filter transactions for the target date
+        const dailyTransactions = transactions.filter(transaction => {
+            const transactionDate = transaction.date || transaction.Date;
+            console.log(`[${new Date().toISOString()}] 📅 Checking transaction date: "${transactionDate}" vs target: "${targetDate}"`);
+            return transactionDate === targetDate;
+        });
+        
+        console.log(`[${new Date().toISOString()}] ✅ Found ${dailyTransactions.length} transactions for ${targetDate}`);
+        console.log(`[${new Date().toISOString()}] 📊 Daily transactions data:`, dailyTransactions);
+        
+        // Calculate statistics
+        const totalSales = dailyTransactions.reduce((sum, t) => {
+            const amount = parseFloat(t.amount) || parseFloat(t.Amount) || 0;
+            console.log(`[${new Date().toISOString()}] 💰 Transaction amount: ${amount} (from ${t.amount || t.Amount})`);
+            return sum + amount;
+        }, 0);
+        const cashTotal = dailyTransactions.filter(t => {
+            const paymentMethod = t.paymentMethod || t.Payment_Method || t.payment || t.Payment;
+            return paymentMethod === 'Cash';
+        }).reduce((sum, t) => sum + (parseFloat(t.amount) || parseFloat(t.Amount) || 0), 0);
+        
+        const cardTotal = dailyTransactions.filter(t => {
+            const paymentMethod = t.paymentMethod || t.Payment_Method || t.payment || t.Payment;
+            return paymentMethod === 'Card';
+        }).reduce((sum, t) => sum + (parseFloat(t.amount) || parseFloat(t.Amount) || 0), 0);
+        
+        // Calculate worker stats
+        const workerStats = {};
+        dailyTransactions.forEach(transaction => {
+            const worker = transaction.worker || transaction.Worker;
+            const amount = parseFloat(transaction.amount) || parseFloat(transaction.Amount) || 0;
+            
+            if (!workerStats[worker]) {
+                workerStats[worker] = { total: 0, count: 0, transactions: [] };
+            }
+            workerStats[worker].total += amount;
+            workerStats[worker].count += 1;
+            workerStats[worker].transactions.push(transaction);
+        });
+        
+        const result = {
+            date: targetDate,
+            totalSales: totalSales,
+            transactionCount: dailyTransactions.length,
+            cashTotal: cashTotal,
+            cardTotal: cardTotal,
+            workerStats: workerStats,
+            recentTransactions: dailyTransactions.slice(-5), // Last 5 transactions
+            entries: dailyTransactions
+        };
+        
+        console.log(`[${new Date().toISOString()}] 📊 Filtered daily data:`, result);
+        return result;
     }
 
     /**
@@ -218,7 +503,7 @@ class GoogleIntegration {
         console.log(`[${new Date().toISOString()}] 🔄 Syncing ${this.offlineData.length} offline entries`);
         
         const syncPromises = this.offlineData.map(entry => 
-            this.makeRequest('addServiceEntry', entry).catch(error => {
+            this.makeRequest('createTransaction', entry).catch(error => {
                 console.error(`[${new Date().toISOString()}] ❌ Failed to sync entry:`, error);
                 return { success: false, entry };
             })
@@ -287,28 +572,7 @@ class GoogleIntegration {
      * @returns {Object} Services object
      */
     getOfflineServices() {
-        return {
-            "Hair Services": {
-                "Basic Hair Cut": 15,
-                "Premium Hair Cut": 25,
-                "Hair Styling": 20,
-                "Hair Wash & Blow Dry": 12,
-                "Hair Coloring": 45,
-                "Hair Treatment": 35,
-                "Highlights": 60
-            },
-            "Shaving Services": {
-                "Basic Shave": 8,
-                "Premium Shave": 15,
-                "Beard Trim": 10,
-                "Mustache Trim": 5
-            },
-            "Facial Services": {
-                "Basic Facial": 25,
-                "Deep Cleansing Facial": 40,
-                "Anti-Aging Facial": 50
-            }
-        };
+        return {};
     }
 
     /**
@@ -330,9 +594,10 @@ class GoogleIntegration {
      */
     getOfflineSettings() {
         return {
-            salonName: "SalonPro",
-            currency: "USD",
-            timezone: "America/New_York",
+            salonName: "BANGZ SALOON",
+            currency: "AED",
+            timezone: "Asia/Dubai",
+            location: "Dubai, UAE",
             offlineMode: true
         };
     }
@@ -377,13 +642,24 @@ class GoogleIntegration {
                 stats.cardTotal += cost;
             }
 
-            // Worker stats
+            // Worker stats with transaction details
             if (entry.worker) {
                 if (!stats.workerStats[entry.worker]) {
-                    stats.workerStats[entry.worker] = { total: 0, count: 0 };
+                    stats.workerStats[entry.worker] = { 
+                        total: 0, 
+                        count: 0, 
+                        transactions: [] 
+                    };
                 }
                 stats.workerStats[entry.worker].total += cost;
                 stats.workerStats[entry.worker].count += 1;
+                stats.workerStats[entry.worker].transactions.push({
+                    service: entry.service,
+                    cost: cost,
+                    payment: entry.payment,
+                    timestamp: entry.timestamp,
+                    customer: entry.customer || ''
+                });
             }
 
             // Recent transactions
@@ -401,7 +677,71 @@ class GoogleIntegration {
             new Date(b.timestamp) - new Date(a.timestamp)
         );
 
+        // Sort worker transactions by timestamp (newest first)
+        Object.values(stats.workerStats).forEach(workerStat => {
+            if (workerStat.transactions) {
+                workerStat.transactions.sort((a, b) => 
+                    new Date(b.timestamp) - new Date(a.timestamp)
+                );
+            }
+        });
+
         return stats;
+    }
+
+    /**
+     * Authenticate user with email and password
+     * @param {string} email - User's email
+     * @param {string} password - User's hashed password
+     * @returns {Promise} Authentication result
+     */
+    async authenticateUser(email, password) {
+        try {
+            if (!this.isOnline) {
+                return this.handleOfflineAuthentication(email, password);
+            }
+
+            const result = await this.makeRequest('authenticateUser', { email, password });
+            
+            if (result.success) {
+                console.log(`[${new Date().toISOString()}] ✅ User authenticated successfully: ${email}`);
+                return { success: true, user: result.user };
+            } else {
+                throw new Error(result.error || 'Authentication failed');
+            }
+        } catch (error) {
+            console.error(`[${new Date().toISOString()}] ❌ Authentication error:`, error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Handle offline authentication (fallback)
+     * @param {string} email - User's email
+     * @param {string} password - User's hashed password
+     * @returns {Object} Offline authentication result
+     */
+    handleOfflineAuthentication(email, password) {
+        // For offline mode, allow admin user only
+        const adminEmail = 'admin@bangzsaloon.com';
+        const adminPassword = '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9';
+        
+        if (email === adminEmail && password === adminPassword) {
+            return {
+                success: true,
+                user: {
+                    email: adminEmail,
+                    name: 'Sohel',
+                    role: 'Admin',
+                    lastLogin: new Date().toISOString()
+                }
+            };
+        }
+        
+        return {
+            success: false,
+            error: 'Offline mode: Only admin access available'
+        };
     }
 
     /**
@@ -431,7 +771,32 @@ class GoogleIntegration {
             lastSync: localStorage.getItem('salon_last_sync') || 'Never'
         };
     }
+
+    /**
+     * Update sheet structure to include Tip and Phone columns
+     * @returns {Promise} Update result
+     */
+    async updateSheetStructure() {
+        try {
+            if (!this.isOnline) {
+                return { success: false, error: 'Offline' };
+            }
+
+            const result = await this.makeRequest('updateSheetStructure', {}, 'GET');
+            return result;
+        } catch (error) {
+            console.error('Error updating sheet structure:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
 }
 
 // Create global instance
 window.googleIntegration = new GoogleIntegration();
+
+
+
+
+
+

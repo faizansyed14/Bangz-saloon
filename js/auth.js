@@ -101,9 +101,11 @@ class AuthenticationManager {
         try {
             console.log(`[${new Date().toISOString()}] 🔐 Authenticating user: ${email}`);
             
-            // Use Google Apps Script for authentication
-            const googleIntegration = new SupabaseIntegration();
-            const result = await googleIntegration.makeRequest('authenticateUser', {
+            // Use the global Supabase integration instance
+            if (!window.supabaseIntegration) {
+                throw new Error('Supabase integration not available');
+            }
+            const result = await window.supabaseIntegration.makeRequest('authenticateUser', {
                 email: email,
                 password: password
             });

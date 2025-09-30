@@ -109,6 +109,7 @@ class SupabaseIntegration {
                     result = await this.getServices();
                     break;
                 case 'addService':
+                case 'createService':
                     result = await this.addService(data);
                     break;
                 case 'updateService':
@@ -122,6 +123,21 @@ class SupabaseIntegration {
                     break;
                 case 'getAllSales':
                     result = await this.getAllSales(data);
+                    break;
+                case 'getDailySales':
+                    result = await this.getDailySales(data);
+                    break;
+                case 'getWorkerPerformance':
+                    result = await this.getWorkerPerformance();
+                    break;
+                case 'getSalesReport':
+                    result = await this.getSalesReport(data);
+                    break;
+                case 'getCalendarData':
+                    result = await this.getCalendarData(data);
+                    break;
+                case 'updateTransaction':
+                    result = await this.updateTransaction(data);
                     break;
                 default:
                     throw new Error(`Unknown endpoint: ${endpoint}`);
@@ -245,8 +261,7 @@ class SupabaseIntegration {
             .from('users')
             .update(updateData)
             .eq('email', data.email)
-            .select()
-            .single();
+            .select();
 
         if (error) {
             return { success: false, error: error.message };
@@ -326,8 +341,7 @@ class SupabaseIntegration {
             .from('workers')
             .update(updateData)
             .eq('email', data.email)
-            .select()
-            .single();
+            .select();
 
         if (error) {
             return { success: false, error: error.message };
@@ -378,15 +392,21 @@ class SupabaseIntegration {
      * Create new transaction
      */
     async createTransaction(data) {
+        // Convert DD/MM/YYYY to YYYY-MM-DD format for database
+        let dbDate = data.date || new Date().toLocaleDateString('en-GB');
+        if (dbDate.includes('/')) {
+            const [day, month, year] = dbDate.split('/');
+            dbDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        }
+        
         const transactionData = {
-            date: data.date || new Date().toLocaleDateString('en-GB'),
-            customer_name: data.customer || data.customerName || '',
+            date: dbDate,
+            customer_name: data.customer || data.customerName || data.customer_name || '',
             service: data.service || '',
             worker: data.worker || '',
             amount: parseFloat(data.cost || data.amount || 0),
             tip: parseFloat(data.tip || 0),
-            payment_method: data.payment || data.paymentMethod || '',
-            notes: data.notes || '',
+            payment_method: data.payment || data.paymentMethod || data.payment_method || '',
             phone: data.phone || '',
             category: data.category || ''
         };
@@ -438,7 +458,7 @@ class SupabaseIntegration {
             .from('services')
             .insert([{
                 category: data.category,
-                service_name: data.serviceName,
+                service_name: data.service_name || data.serviceName,
                 cost: parseFloat(data.cost)
             }])
             .select()
@@ -469,8 +489,7 @@ class SupabaseIntegration {
             })
             .eq('category', data.oldCategory)
             .eq('service_name', data.oldServiceName)
-            .select()
-            .single();
+            .select();
 
         if (error) {
             return { success: false, error: error.message };
@@ -505,10 +524,17 @@ class SupabaseIntegration {
     async getDailyData(data) {
         const date = data.date || new Date().toLocaleDateString('en-GB');
         
+        // Convert DD/MM/YYYY to YYYY-MM-DD format for database query
+        let dbDate = date;
+        if (date.includes('/')) {
+            const [day, month, year] = date.split('/');
+            dbDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        }
+        
         const { data: transactions, error } = await this.supabase
             .from('transactions')
             .select('*')
-            .eq('date', date)
+            .eq('date', dbDate)
             .order('created_at', { ascending: false });
 
         if (error) {
@@ -568,7 +594,13 @@ class SupabaseIntegration {
             .order('created_at', { ascending: false });
 
         if (data.date) {
-            query = query.eq('date', data.date);
+            // Convert DD/MM/YYYY to YYYY-MM-DD format for database query
+            let dbDate = data.date;
+            if (data.date.includes('/')) {
+                const [day, month, year] = data.date.split('/');
+                dbDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+            }
+            query = query.eq('date', dbDate);
         }
 
         const { data: transactions, error } = await query;
@@ -753,6 +785,201 @@ class SupabaseIntegration {
         this.offlineData = [];
         localStorage.removeItem('salon_offline_data');
         console.log(`[${new Date().toISOString()}] ✅ Offline data cleared`);
+    }
+
+    /**
+     * Get daily sales for a specific date
+     */
+    async getDailySales(data) {
+        const { date } = data;
+        
+        const { data: sales, error } = await this.supabase
+            .from('transactions')
+            .select('*')
+            .eq('date', date);
+
+        if (error) {
+            return { success: false, error: error.message };
+        }
+
+        const totalSales = sales.reduce((sum, transaction) => sum + parseFloat(transaction.amount), 0);
+        const totalTips = sales.reduce((sum, transaction) => sum + parseFloat(transaction.tip || 0), 0);
+        const cashTotal = sales
+            .filter(t => t.payment_method === 'Cash')
+            .reduce((sum, transaction) => sum + parseFloat(transaction.amount), 0);
+        const cardTotal = sales
+            .filter(t => t.payment_method === 'Card')
+            .reduce((sum, transaction) => sum + parseFloat(transaction.amount), 0);
+
+        return {
+            success: true,
+            data: {
+                date,
+                total_sales: totalSales,
+                total_tips: totalTips,
+                cash_total: cashTotal,
+                card_total: cardTotal,
+                transaction_count: sales.length,
+                transactions: sales
+            }
+        };
+    }
+
+    /**
+     * Get worker performance data
+     */
+    async getWorkerPerformance() {
+        const { data: transactions, error } = await this.supabase
+            .from('transactions')
+            .select('worker, amount, tip, date');
+
+        if (error) {
+            return { success: false, error: error.message };
+        }
+
+        const performance = {};
+        transactions.forEach(transaction => {
+            const worker = transaction.worker;
+            if (!performance[worker]) {
+                performance[worker] = {
+                    worker,
+                    transaction_count: 0,
+                    total_sales: 0,
+                    total_tips: 0,
+                    average_transaction: 0,
+                    last_transaction_date: null
+                };
+            }
+            
+            performance[worker].transaction_count++;
+            performance[worker].total_sales += parseFloat(transaction.amount);
+            performance[worker].total_tips += parseFloat(transaction.tip || 0);
+            
+            if (!performance[worker].last_transaction_date || 
+                transaction.date > performance[worker].last_transaction_date) {
+                performance[worker].last_transaction_date = transaction.date;
+            }
+        });
+
+        // Calculate averages
+        Object.values(performance).forEach(worker => {
+            worker.average_transaction = worker.total_sales / worker.transaction_count;
+        });
+
+        return {
+            success: true,
+            data: Object.values(performance).sort((a, b) => b.total_sales - a.total_sales)
+        };
+    }
+
+    /**
+     * Get sales report for date range
+     */
+    async getSalesReport(data) {
+        const { startDate, endDate } = data;
+        
+        const { data: transactions, error } = await this.supabase
+            .from('transactions')
+            .select('*')
+            .gte('date', startDate)
+            .lte('date', endDate);
+
+        if (error) {
+            return { success: false, error: error.message };
+        }
+
+        const totalSales = transactions.reduce((sum, transaction) => sum + parseFloat(transaction.amount), 0);
+        const totalTips = transactions.reduce((sum, transaction) => sum + parseFloat(transaction.tip || 0), 0);
+        const cashTotal = transactions
+            .filter(t => t.payment_method === 'Cash')
+            .reduce((sum, transaction) => sum + parseFloat(transaction.amount), 0);
+        const cardTotal = transactions
+            .filter(t => t.payment_method === 'Card')
+            .reduce((sum, transaction) => sum + parseFloat(transaction.amount), 0);
+
+        return {
+            success: true,
+            data: {
+                start_date: startDate,
+                end_date: endDate,
+                total_sales: totalSales,
+                total_tips: totalTips,
+                cash_total: cashTotal,
+                card_total: cardTotal,
+                transaction_count: transactions.length,
+                transactions: transactions
+            }
+        };
+    }
+
+    /**
+     * Get calendar data for a month
+     */
+    async getCalendarData(data) {
+        const { month, year } = data;
+        
+        // Get start and end dates for the month
+        const startDate = `${year}-${month.toString().padStart(2, '0')}-01`;
+        const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+        
+        const { data: transactions, error } = await this.supabase
+            .from('transactions')
+            .select('date, amount, tip, payment_method')
+            .gte('date', startDate)
+            .lte('date', endDate);
+
+        if (error) {
+            return { success: false, error: error.message };
+        }
+
+        const calendarData = {};
+        transactions.forEach(transaction => {
+            const date = transaction.date;
+            if (!calendarData[date]) {
+                calendarData[date] = {
+                    total_sales: 0,
+                    total_tips: 0,
+                    transaction_count: 0,
+                    cash_total: 0,
+                    card_total: 0
+                };
+            }
+            
+            calendarData[date].total_sales += parseFloat(transaction.amount);
+            calendarData[date].total_tips += parseFloat(transaction.tip || 0);
+            calendarData[date].transaction_count++;
+            
+            if (transaction.payment_method === 'Cash') {
+                calendarData[date].cash_total += parseFloat(transaction.amount);
+            } else {
+                calendarData[date].card_total += parseFloat(transaction.amount);
+            }
+        });
+
+        return {
+            success: true,
+            data: calendarData
+        };
+    }
+
+    /**
+     * Update transaction
+     */
+    async updateTransaction(data) {
+        const { id, ...updateData } = data;
+        
+        const { data: result, error } = await this.supabase
+            .from('transactions')
+            .update(updateData)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            return { success: false, error: error.message };
+        }
+
+        return { success: true, message: 'Transaction updated successfully', data: result };
     }
 }
 

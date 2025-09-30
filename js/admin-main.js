@@ -8,7 +8,10 @@ class AdminManager {
         this.workers = [];
         this.transactions = [];
         this.users = [];
-        this.googleIntegration = new SupabaseIntegration();
+        this.googleIntegration = window.supabaseIntegration;
+        if (!this.googleIntegration) {
+            console.error('Supabase integration not available in AdminManager');
+        }
         this.currentUser = null;
         this.currentCalendarDate = new Date();
         this.selectedDate = null;
@@ -1094,8 +1097,16 @@ class AdminManager {
             const today = new Date().toLocaleDateString('en-GB');
             console.log(`[${new Date().toISOString()}] 🔄 Loading today's sales data for admin dashboard: ${today}`);
             
-            const todayData = await this.googleIntegration.getDailyData(today);
-            console.log(`[${new Date().toISOString()}] 📊 Today's data loaded:`, todayData);
+            const todayDataResult = await this.googleIntegration.getDailyData({ date: today });
+            console.log(`[${new Date().toISOString()}] 📊 Today's data loaded:`, todayDataResult);
+            
+            // Extract data from response
+            const todayData = todayDataResult && todayDataResult.success ? todayDataResult.data : {
+                totalSales: 0,
+                transactionCount: 0,
+                cashTotal: 0,
+                cardTotal: 0
+            };
             
             // Update today's sales elements
             const todayTotalSalesEl = document.getElementById('admin-today-total-sales');
@@ -1396,7 +1407,7 @@ class AdminManager {
         this.showLoading(true);
 
         try {
-            const salesData = await this.googleIntegration.getAllSales(dateString);
+            const salesData = await this.googleIntegration.getAllSales({ date: dateString });
             
             if (salesData && salesData.success) {
                 this.displayAdminSalesData(salesData.data);
@@ -1484,18 +1495,20 @@ class AdminManager {
         if (transactions && transactions.length > 0) {
             transactions.forEach(transaction => {
                 const row = document.createElement('tr');
+                const time = this.formatTimeFromDate(transaction.created_at);
+                
                 row.innerHTML = `
                     <td>${transaction.date || ''}</td>
                     <td>${transaction.worker || 'Unknown'}</td>
                     <td>${transaction.service || 'Unknown'}</td>
-                <td><span class="category-badge ${(transaction.category || '').toLowerCase()}">${transaction.category || 'Unknown'}</span></td>
-                    <td>${transaction.customer || 'Unknown'}</td>
+                    <td><span class="category-badge ${(transaction.category || '').toLowerCase()}">${transaction.category || 'N/A'}</span></td>
+                    <td>${transaction.customer_name || 'Unknown'}</td>
                     <td>
-                        ${transaction.amount || '0'} AED
-                        ${transaction.tip && transaction.tip > 0 ? `<br><small style="color: #f39c12;">💝 Tip: ${transaction.tip} AED</small>` : ''}
+                        ${(transaction.amount || 0).toFixed(2)} AED
+                        ${transaction.tip && transaction.tip > 0 ? `<br><small style="color: #f39c12;">💝 Tip: ${transaction.tip.toFixed(2)} AED</small>` : ''}
                     </td>
-                    <td>${transaction.paymentMethod || 'Unknown'}</td>
-                    <td>${transaction.time || ''}</td>
+                    <td>${transaction.payment_method || 'Unknown'}</td>
+                    <td>${time || ''}</td>
                 `;
                 tableBody.appendChild(row);
             });
@@ -1606,19 +1619,19 @@ class AdminManager {
 
         transactions.forEach(transaction => {
             const row = document.createElement('tr');
-            const time = this.formatTimeFromDate(transaction.createdAt);
+            const time = this.formatTimeFromDate(transaction.created_at);
             
             row.innerHTML = `
                 <td>${transaction.date}</td>
                 <td>${transaction.worker}</td>
                 <td>${transaction.service}</td>
                 <td><span class="category-badge ${(transaction.category || '').toLowerCase()}">${transaction.category || 'N/A'}</span></td>
-                <td>${transaction.customer || 'N/A'}</td>
+                <td>${transaction.customer_name}</td>
                 <td>
                     ${transaction.amount.toFixed(2)} AED
                     ${transaction.tip && transaction.tip > 0 ? `<br><small style="color: #f39c12;">💝 Tip: ${transaction.tip.toFixed(2)} AED</small>` : ''}
                 </td>
-                <td>${transaction.paymentMethod}</td>
+                <td>${transaction.payment_method}</td>
                 <td>${time}</td>
             `;
             tableBody.appendChild(row);

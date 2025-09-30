@@ -344,7 +344,7 @@ class SalonManager {
             // Update service options if a category is already selected
             const categorySelect = document.getElementById('service-category');
             if (categorySelect && categorySelect.value) {
-                this.updateServiceOptions(categorySelect.value);
+                this.loadServicesForCategory(categorySelect.value);
             }
         } catch (error) {
             console.error(`[${new Date().toISOString()}] ❌ Error refreshing services:`, error);
@@ -363,7 +363,7 @@ class SalonManager {
         });
         
         // Test service options update
-        this.updateServiceOptions('Hair Services');
+        this.loadServicesForCategory('Normal');
         
         return this.services;
     }
@@ -842,8 +842,21 @@ class SalonManager {
         
         try {
             console.log(`[${new Date().toISOString()}] 🔄 Loading dashboard data for ${today}`);
-            this.dashboardData = await this.googleIntegration.getDailyData(today);
-            console.log(`[${new Date().toISOString()}] ✅ Dashboard data loaded:`, this.dashboardData);
+            const result = await this.googleIntegration.getDailyData(today);
+            if (result && result.success) {
+                this.dashboardData = result.data;
+                console.log(`[${new Date().toISOString()}] ✅ Dashboard data loaded:`, this.dashboardData);
+            } else {
+                console.error(`[${new Date().toISOString()}] ❌ Failed to load dashboard data:`, result?.error);
+                this.dashboardData = {
+                    totalSales: 0,
+                    transactionCount: 0,
+                    cashTotal: 0,
+                    cardTotal: 0,
+                    workerStats: {},
+                    recentTransactions: []
+                };
+            }
         } catch (error) {
             console.error(`[${new Date().toISOString()}] ❌ Error loading dashboard data:`, error);
             this.dashboardData = {
@@ -1087,7 +1100,7 @@ class SalonManager {
             }, 300);
         }, 3000);
 
-        console.log(`[${new Date().toISOString()}] 📢 Message shown: ${message} (${type})${isNewEntry ? ' - NEW ENTRY' : ''}`);
+        console.log(`[${new Date().toISOString()}] 📢 Message shown: ${message} (success) - NEW ENTRY`);
     }
 
     redirectToDashboard() {
@@ -1435,7 +1448,7 @@ class SalonManager {
         this.showLoading(true);
 
         try {
-            const salesData = await this.googleIntegration.getAllSales(dateString);
+            const salesData = await this.googleIntegration.getAllSales({ date: dateString });
             
             if (salesData && salesData.success) {
                 this.displaySalesData(salesData.data);
@@ -1523,16 +1536,18 @@ class SalonManager {
         if (transactions && transactions.length > 0) {
             transactions.forEach(transaction => {
                 const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${transaction.date || ''}</td>
-                <td>${transaction.worker || 'Unknown'}</td>
-                <td>${transaction.service || 'Unknown'}</td>
-                <td><span class="category-badge ${(transaction.category || '').toLowerCase()}">${transaction.category || 'Unknown'}</span></td>
-                <td>${transaction.customer || 'Unknown'}</td>
-                <td>${transaction.amount || '0'} AED</td>
-                <td>${transaction.paymentMethod || 'Unknown'}</td>
-                <td>${transaction.time || ''}</td>
-            `;
+                const time = this.formatTimeFromDate(transaction.created_at);
+                
+                row.innerHTML = `
+                    <td>${transaction.date || ''}</td>
+                    <td>${transaction.worker || 'Unknown'}</td>
+                    <td>${transaction.service || 'Unknown'}</td>
+                    <td><span class="category-badge ${(transaction.category || '').toLowerCase()}">${transaction.category || 'N/A'}</span></td>
+                    <td>${transaction.customer_name || 'Unknown'}</td>
+                    <td>${(transaction.amount || 0).toFixed(2)} AED</td>
+                    <td>${transaction.payment_method || 'Unknown'}</td>
+                    <td>${time || ''}</td>
+                `;
                 tableBody.appendChild(row);
             });
         } else {
@@ -1661,16 +1676,16 @@ class SalonManager {
 
         transactions.forEach(transaction => {
             const row = document.createElement('tr');
-            const time = this.formatTimeFromDate(transaction.createdAt);
+            const time = this.formatTimeFromDate(transaction.created_at);
             
             row.innerHTML = `
                 <td>${transaction.date}</td>
                 <td>${transaction.worker}</td>
                 <td>${transaction.service}</td>
                 <td><span class="category-badge ${(transaction.category || '').toLowerCase()}">${transaction.category || 'N/A'}</span></td>
-                <td>${transaction.customer}</td>
+                <td>${transaction.customer_name}</td>
                 <td>${transaction.amount.toFixed(2)} AED</td>
-                <td>${transaction.paymentMethod}</td>
+                <td>${transaction.payment_method}</td>
                 <td>${time}</td>
             `;
             tableBody.appendChild(row);

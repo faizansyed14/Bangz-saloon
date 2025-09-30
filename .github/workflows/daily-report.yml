@@ -1,0 +1,30 @@
+name: Daily Sales Report
+
+on:
+  schedule:
+    # Run every day at 11:00 PM UTC (adjust timezone as needed)
+    # For Dubai time (UTC+4), this is 3:00 AM UTC = 11:00 PM Dubai
+    - cron: '0 19 * * *'  # 7:00 PM UTC = 11:00 PM Dubai (UTC+4)
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  send-daily-report:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Send Daily Report
+      run: |
+        echo "Sending daily sales report..."
+        
+        # Get the Supabase function URL
+        SUPABASE_URL="${{ secrets.SUPABASE_URL }}"
+        SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY }}"
+        
+        # Call the daily report function
+        curl -X POST \
+          "$SUPABASE_URL/functions/v1/daily-report" \
+          -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+          -H "Content-Type: application/json" \
+          -d '{}'
+        
+        echo "Daily report sent successfully!"

@@ -10,6 +10,11 @@
 [build.environment]
   NODE_VERSION = "18"
 
+# Scheduled function for daily email reports
+[[functions]]
+  function = "daily-email-trigger"
+  schedule = "0 19 * * *"  # 7 PM UTC = 11 PM Dubai time
+
 # Headers for security and performance
 [[headers]]
   for = "/*"

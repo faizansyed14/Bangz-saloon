@@ -92,6 +92,7 @@
     <!-- Supabase CDN -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="js/supabase-integration.js"></script>
+    <script src="config.js"></script>
 
     <script>
         let testResults = {
@@ -119,11 +120,8 @@
             log('connection-log', 'Testing Supabase connection...');
             
             try {
-                // Initialize with test credentials (you'll need to update these)
-                window.supabaseIntegration.setCredentials(
-                    'YOUR_SUPABASE_URL',
-                    'YOUR_SUPABASE_ANON_KEY'
-                );
+                // Credentials are loaded from config.js
+                // Make sure to update config.js with your actual Supabase credentials
 
                 const result = await window.supabaseIntegration.testConnection();
                 

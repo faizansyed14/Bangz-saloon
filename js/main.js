@@ -8,7 +8,10 @@ class SalonManager {
         this.workers = [];
         this.services = {};
         this.currentEntry = {};
-        this.googleIntegration = new SupabaseIntegration();
+        this.googleIntegration = window.supabaseIntegration;
+        if (!this.googleIntegration) {
+            console.error('Supabase integration not available in SalonManager');
+        }
         this.currentCalendarDate = new Date();
         this.selectedDate = null;
         this.calendarData = {};
@@ -264,9 +267,15 @@ class SalonManager {
             this.populateWorkerDropdown();
 
             // Load services
-            this.services = await this.googleIntegration.getServices();
-            console.log(`[${new Date().toISOString()}] ✅ Service data loaded successfully`);
-            console.log(`[${new Date().toISOString()}] 🛠️ Services data:`, this.services);
+            const servicesResult = await this.googleIntegration.getServices();
+            if (servicesResult && servicesResult.success) {
+                this.services = servicesResult.data;
+                console.log(`[${new Date().toISOString()}] ✅ Service data loaded successfully`);
+                console.log(`[${new Date().toISOString()}] 🛠️ Services data:`, this.services);
+            } else {
+                console.error(`[${new Date().toISOString()}] ❌ Failed to load services:`, servicesResult?.error);
+                this.services = {};
+            }
 
             // Load today's data for dashboard
             await this.loadDashboardData();
@@ -323,8 +332,14 @@ class SalonManager {
     async refreshServices() {
         console.log(`[${new Date().toISOString()}] 🔄 Refreshing services data`);
         try {
-            this.services = await this.googleIntegration.getServices();
-            console.log(`[${new Date().toISOString()}] ✅ Services refreshed:`, this.services);
+            const servicesResult = await this.googleIntegration.getServices();
+            if (servicesResult && servicesResult.success) {
+                this.services = servicesResult.data;
+                console.log(`[${new Date().toISOString()}] ✅ Services refreshed:`, this.services);
+            } else {
+                console.error(`[${new Date().toISOString()}] ❌ Failed to refresh services:`, servicesResult?.error);
+                this.services = {};
+            }
             
             // Update service options if a category is already selected
             const categorySelect = document.getElementById('service-category');
@@ -422,8 +437,8 @@ class SalonManager {
             const allServices = await this.googleIntegration.getServices();
             console.log(`[${new Date().toISOString()}] 📊 All services:`, allServices);
             
-            if (allServices && allServices[category]) {
-                this.displayServicesForCategory(category, allServices[category]);
+            if (allServices && allServices.success && allServices.data && allServices.data[category]) {
+                this.displayServicesForCategory(category, allServices.data[category]);
             } else {
                 console.log(`[${new Date().toISOString()}] ⚠️ No services found for category: ${category}`);
                 this.clearServiceCategories();

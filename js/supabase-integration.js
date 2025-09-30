@@ -5,28 +5,29 @@
 
 class SupabaseIntegration {
     constructor() {
-        // These will be set from environment variables in production
-        this.supabaseUrl = 'YOUR_SUPABASE_URL';
-        this.supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
+        // These will be set from config.js or environment variables
+        this.supabaseUrl = null;
+        this.supabaseKey = null;
         this.supabase = null;
         this.isOnline = navigator.onLine;
         this.offlineData = this.loadOfflineData();
         
         this.setupOnlineOfflineHandlers();
-        this.initializeSupabase();
-        console.log(`[${new Date().toISOString()}] ✅ Supabase Integration initialized`);
+        console.log(`[${new Date().toISOString()}] ✅ Supabase Integration initialized (waiting for credentials)`);
     }
 
     /**
      * Initialize Supabase client
      */
     initializeSupabase() {
-        // Check if Supabase is available (will be loaded from CDN)
-        if (typeof supabase !== 'undefined') {
+        // Check if Supabase is available and credentials are set
+        if (typeof supabase !== 'undefined' && this.supabaseUrl && this.supabaseKey) {
             this.supabase = supabase.createClient(this.supabaseUrl, this.supabaseKey);
-            console.log(`[${new Date().toISOString()}] 🔗 Supabase client initialized`);
-        } else {
+            console.log(`[${new Date().toISOString()}] 🔗 Supabase client initialized with URL: ${this.supabaseUrl}`);
+        } else if (typeof supabase === 'undefined') {
             console.warn(`[${new Date().toISOString()}] ⚠️ Supabase not loaded, using fallback mode`);
+        } else {
+            console.warn(`[${new Date().toISOString()}] ⚠️ Supabase credentials not set, waiting for setCredentials() call`);
         }
     }
 
@@ -36,9 +37,8 @@ class SupabaseIntegration {
     setCredentials(url, key) {
         this.supabaseUrl = url;
         this.supabaseKey = key;
-        if (typeof supabase !== 'undefined') {
-            this.supabase = supabase.createClient(url, key);
-        }
+        console.log(`[${new Date().toISOString()}] 🔑 Setting Supabase credentials: ${url}`);
+        this.initializeSupabase();
     }
 
     /**

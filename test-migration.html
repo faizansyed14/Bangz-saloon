@@ -120,8 +120,18 @@
             log('connection-log', 'Testing Supabase connection...');
             
             try {
-                // Credentials are loaded from config.js
-                // Make sure to update config.js with your actual Supabase credentials
+                // Wait for supabaseIntegration to be available
+                if (!window.supabaseIntegration) {
+                    throw new Error('Supabase integration not loaded. Please check your script includes.');
+                }
+
+                // Set credentials from config
+                if (typeof SUPABASE_CONFIG !== 'undefined') {
+                    window.supabaseIntegration.setCredentials(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+                    log('connection-log', '✅ Credentials loaded from config.js');
+                } else {
+                    throw new Error('SUPABASE_CONFIG not found. Please check config.js file.');
+                }
 
                 const result = await window.supabaseIntegration.testConnection();
                 
@@ -143,6 +153,10 @@
             log('auth-log', 'Testing user authentication...');
             
             try {
+                if (!window.supabaseIntegration) {
+                    throw new Error('Supabase integration not available');
+                }
+
                 const result = await window.supabaseIntegration.makeRequest('authenticateUser', {
                     email: 'admin@bangzsaloon.com',
                     password: 'admin123' // Default password
@@ -167,6 +181,10 @@
             log('data-log', 'Testing data operations...');
             
             try {
+                if (!window.supabaseIntegration) {
+                    throw new Error('Supabase integration not available');
+                }
+
                 // Test getting services
                 log('data-log', 'Testing getServices...');
                 const servicesResult = await window.supabaseIntegration.makeRequest('getServices');
@@ -207,6 +225,10 @@
             log('performance-log', 'Testing performance...');
             
             try {
+                if (!window.supabaseIntegration) {
+                    throw new Error('Supabase integration not available');
+                }
+
                 const startTime = performance.now();
                 
                 // Test multiple operations
@@ -260,21 +282,44 @@
             resultsDiv.style.display = 'block';
         }
 
+        // Wait for all scripts to load before running tests
+        function waitForScripts() {
+            return new Promise((resolve) => {
+                const checkScripts = () => {
+                    if (window.supabaseIntegration && typeof SUPABASE_CONFIG !== 'undefined') {
+                        resolve();
+                    } else {
+                        setTimeout(checkScripts, 100);
+                    }
+                };
+                checkScripts();
+            });
+        }
+
         // Auto-run tests when page loads
         window.addEventListener('load', async () => {
             log('connection-log', 'Starting migration tests...');
+            log('connection-log', 'Waiting for scripts to load...');
             
-            // Run tests sequentially
-            await testConnection();
-            if (testResults.connection) {
-                await testAuthentication();
-                if (testResults.authentication) {
-                    await testDataOperations();
-                    await testPerformance();
+            try {
+                await waitForScripts();
+                log('connection-log', '✅ All scripts loaded successfully');
+                
+                // Run tests sequentially
+                await testConnection();
+                if (testResults.connection) {
+                    await testAuthentication();
+                    if (testResults.authentication) {
+                        await testDataOperations();
+                        await testPerformance();
+                    }
                 }
+                
+                showResults();
+            } catch (error) {
+                log('connection-log', `❌ Error loading scripts: ${error.message}`);
+                showResults();
             }
-            
-            showResults();
         });
     </script>
 </body>

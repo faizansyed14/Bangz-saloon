@@ -11,9 +11,28 @@ const SUPABASE_CONFIG = {
 };
 
 // Initialize Supabase with your credentials
-if (typeof window !== 'undefined' && window.supabaseIntegration) {
-    window.supabaseIntegration.setCredentials(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
-    console.log('✅ Supabase credentials loaded from config.js');
+function initializeSupabase() {
+    if (typeof window !== 'undefined' && window.supabaseIntegration) {
+        window.supabaseIntegration.setCredentials(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+        console.log('✅ Supabase credentials loaded from config.js');
+        return true;
+    }
+    return false;
+}
+
+// Try to initialize immediately, or wait for the integration to be available
+if (!initializeSupabase()) {
+    // Wait for supabaseIntegration to be available
+    const checkForIntegration = setInterval(() => {
+        if (initializeSupabase()) {
+            clearInterval(checkForIntegration);
+        }
+    }, 100);
+    
+    // Stop checking after 5 seconds
+    setTimeout(() => {
+        clearInterval(checkForIntegration);
+    }, 5000);
 }
 
 // Export for use in other files
